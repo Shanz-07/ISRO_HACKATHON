@@ -1,0 +1,27 @@
+1) Reference image 
+2) program to randomly light up in random places in each lens
+3) calculate displacements by 2-1 (d)
+3) slope = pixelsize/focal length(c) -> S=(d*c)[form a row matrix]
+4) construct A using any zernike modes
+5) find pseudo inverse of A get B
+6) calculate (phi) = B*S
+7) using phi how to reconstruct W(xi,yi)
+8) Reconstruct the wavefront W(xi,yi)
+
+   For every point (xi,yi) inside the pupil:
+   W(xi,yi) =
+   Φ1 × Z1(xi,yi)
+   +
+   Φ2 × Z2(xi,yi)
+   +
+   Φ3 × Z3(xi,yi)
+   + ...
+9) Find turbulence (coherence length) and coherence time (give me formulaes)
+10)Deformable mirror control
+    -> W=I*A'
+where I = Influence matrix
+      W = Reconstructed wavefront
+      A = Actuator Matrix
+4**) Finding A (interactive matrix)
+for our case let us take 6 zernike modes:
+ *z1 (piston) , z2(tip) , z3(tilt) , z4(defocus), z5( vertical astigmatism), z6(oblique astigmatism)

@@ -1,0 +1,22 @@
+format:
+frame_0xx.bmp
+reference.bmp
+centroid.c[calculates centroids]
+slope.c[calculate Slope Matrix]
+--------------------------------------------------------------------------------------------
+Intereaction.c[Build Matrix A with x zernike polynomials and find pseuduinverse(a)=B]
+phi.c [This is our zernike coeffecient matrix ]
+reconstruction.c[W(xi,yi)]:  For every point (xi,yi) inside the pupil:
+   W(xi,yi) =
+   Φ1 × Z1(xi,yi)
+   +
+   Φ2 × Z2(xi,yi)
+   +
+   Φ3 × Z3(xi,yi)
+   + ...
+turbulence.c (coherence length) and coherence time (give me formulaes)
+DM_control.c
+    W=I*A'
+where I = Influence matrix
+      W = Reconstructed wavefront
+      A = Actuator Matrix

@@ -1,0 +1,285 @@
+PROPOSED METHODOLOGY
+
+Input:
+Time-series SHWFS images obtained from the Shack-Hartmann Wavefront Sensor.
+
+Step 1: Spot Detection
+-> Detect individual focal spots corresponding to each lenslet.
+-> Segment each lenslet sub-aperture region.
+
+Step 2: Centroid Computation
+-> Compute spot centroids using intensity-weighted centroiding.
+-> Obtain centroid coordinates (xc,yc) for every lenslet.
+
+Step 3: Spot Displacement Estimation
+-> Compare centroids against reference spot positions.
+-> Calculate displacement vectors (Δx, Δy).
+
+Step 4: Local Wavefront Slope Estimation
+-> Convert displacement vectors into local wavefront slopes.
+-> Construct the slope vector S.
+
+Step 5: Wavefront Reconstruction
+-> Use modal reconstruction based on Zernike polynomials.
+-> Compute Zernike coefficients from measured slopes.
+-> Reconstruct the wavefront phase map W(x,y).
+
+Step 6: Turbulence Characterization
+-> Compute Fried parameter (r0) using reconstructed phase statistics.
+-> Estimate coherence time (τ0) using temporal correlation of consecutive frames.
+
+Step 7: Deformable Mirror Control
+-> Generate the conjugate wavefront.
+-> Apply the DM influence matrix (fried geometry).
+-> Compute actuator stroke lengths while accounting for inter-actuator coupling.
+
+Output:
+-> Reconstructed Wavefront Map
+-> Turbulence Parameters (r0, τ0)
+-> DM Actuator Stroke Map
+
+
+
+Dataset required:
+
+REQUIRED INPUT DATA
+
+To perform wavefront reconstruction, turbulence characterization and deformable mirror control, 
+the following information is required:
+
+1. Shack-Hartmann Wavefront Sensor Data
+   -> Time-series SHWFS images (BMP/FITS/PNG or equivalent)
+   -> Frame acquisition rate (FPS)
+   -> Image resolution
+
+2. Reference Wavefront Data
+   -> Reference spot positions corresponding to an undistorted plane wavefront
+   OR
+   -> A reference SHWFS image captured under calibration conditions
+
+3. Microlens Array (MLA) Parameters
+   -> Number of lenslets (rows × columns)
+   -> Lenslet pitch
+   -> Lenslet focal length
+   -> Sub-aperture geometry
+   -> Pupil diameter
+
+4. Detector Parameters
+   -> Pixel size
+   -> Sensor dimensions
+   -> Image coordinate convention
+
+5. Temporal Information
+   -> Timestamp or frame rate for each frame
+   -> Time interval between consecutive measurements
+
+6. Deformable Mirror Information
+   -> Number of actuators
+   -> Actuator geometry/layout
+   -> Influence matrix
+   -> Inter-actuator coupling model
+   -> Stroke limits
+
+7. System Geometry
+   -> Relative alignment between SHWFS lenslet grid and DM actuator grid
+   -> Fried geometry mapping information
+
+PROCEEDING IN THE ABSENCE OF A PROVIDED DATASET
+
+At the time of development, no SHWFS dataset, system calibration files, or hardware parameters have been provided. Therefore, a simulation-driven development, testing, and validation framework will be established to enable end-to-end implementation of the proposed Adaptive Optics pipeline.
+
+The objective of this framework is to generate physically realistic Shack-Hartmann Wavefront Sensor measurements with known 
+ground-truth wavefronts, allowing quantitative evaluation of reconstruction accuracy, turbulence estimation performance, 
+and deformable mirror control algorithms.
+
+---
+
+ASSUMPTIONS
+
+* Atmospheric turbulence follows the Kolmogorov turbulence model.
+* The incoming light from astronomical sources can be approximated as a plane wavefront before atmospheric propagation.
+* The SHWFS consists of a uniformly spaced Microlens Array (MLA).
+* The deformable mirror follows Fried geometry with respect to the lenslet array.
+* Literature-based optical parameters will be used during simulation in the absence of hardware specifications.
+* The generated synthetic dataset serves solely as a development and validation environment until experimental data becomes 
+available.
+
+---
+
+SYNTHETIC DATASET GENERATION
+
+STEP 1: GROUND-TRUTH WAVEFRONT GENERATION
+
+A known wavefront phase map is generated using a weighted combination of orthogonal Zernike polynomials.
+
+Wavefront = Sum of (Coefficient × Zernike Mode)
+
+where:
+
+* Wavefront represents the phase distribution.
+* Zernike Modes represent orthogonal optical aberration modes.
+* Coefficients determine the contribution of each aberration mode.
+
+The generated wavefront contains controlled aberrations including:
+
+* Tip/Tilt
+* Defocus
+* Astigmatism
+* Coma
+* Trefoil
+* Spherical Aberration
+
+The complete phase map and modal coefficients are retained as ground truth for validation.
+
+---
+
+STEP 2: ATMOSPHERIC TURBULENCE SIMULATION
+
+To simulate realistic atmospheric distortion, turbulence phase screens are generated according to Kolmogorov statistics.
+
+The generated phase screens are parameterized using the Fried coherence length (r0).
+
+A time-varying sequence of phase screens is then created using a frozen-flow atmospheric model, producing realistic temporal 
+evolution of turbulence and enabling estimation of both spatial and temporal turbulence characteristics.
+
+---
+
+STEP 3: SHACK-HARTMANN SENSOR SIMULATION
+
+The telescope pupil is divided into multiple lenslet sub-apertures.
+
+For each lenslet, the average local wavefront slopes in the horizontal and vertical directions are computed across the 
+sub-aperture.
+
+The measured slopes are converted into focal spot displacements based on the lenslet focal length.
+
+The resulting spot displacements are used to generate synthetic Shack-Hartmann images representing the output of a 
+
+real sensor.
+
+To improve realism, sensor noise models may be incorporated, including:
+
+* Photon noise
+* Detector readout noise
+* Quantization effects
+
+The final output consists of a time-series of synthetic SHWFS image frames.
+
+---
+
+RECONSTRUCTION PIPELINE EXECUTION
+
+The generated SHWFS frames are processed using the proposed reconstruction pipeline.
+
+STEP 1: SPOT DETECTION
+
+* Detect focal spots corresponding to individual lenslets.
+* Segment lenslet sub-aperture regions.
+
+STEP 2: CENTROID COMPUTATION
+
+* Compute intensity-weighted spot centroids.
+* Determine centroid coordinates (xc, yc).
+
+STEP 3: SPOT DISPLACEMENT ESTIMATION
+
+* Compare measured centroids against reference centroids.
+* Compute displacement vectors (Delta x, Delta y).
+
+STEP 4: LOCAL WAVEFRONT SLOPE ESTIMATION
+
+* Convert centroid displacements into local slope measurements.
+* Construct the global slope vector.
+
+STEP 5: WAVEFRONT RECONSTRUCTION
+
+A modal reconstruction framework based on Zernike polynomials is employed.
+
+Advantages of modal reconstruction include:
+
+* Compact representation of optical aberrations.
+* Noise suppression through modal filtering.
+* Reduced computational complexity.
+* Direct compatibility with adaptive optics control systems.
+
+The measured slope vector is projected onto the modal basis to obtain Zernike coefficients, which are subsequently used to 
+reconstruct the complete wavefront phase map.
+
+---
+
+STEP 6: TURBULENCE CHARACTERIZATION
+
+The reconstructed phase maps are analyzed to estimate atmospheric parameters.
+
+Fried Parameter (r0)
+
+* Estimated using phase statistics and Kolmogorov turbulence theory.
+
+Coherence Time (tau0)
+
+* Estimated from temporal correlation of reconstructed wavefront measurements across consecutive frames.
+
+---
+
+STEP 7: DEFORMABLE MIRROR CONTROL
+
+The reconstructed phase error is converted into a conjugate correction wavefront.
+
+To account for physical actuator interactions, an influence matrix formulation is employed.
+
+Wavefront = Influence Matrix × Actuator Stroke Vector
+
+where:
+
+* Wavefront = Desired correction wavefront
+* Influence Matrix = Actuator coupling model
+* Actuator Stroke Vector = Required actuator displacements
+
+The actuator commands are obtained by solving the inverse problem while accounting for inter-actuator coupling effects.
+
+The resulting actuator stroke map represents the final correction command delivered to the deformable mirror.
+
+---
+
+VALIDATION STRATEGY
+
+Since all simulated wavefronts and turbulence parameters are known beforehand, reconstruction accuracy can be quantitatively 
+evaluated against ground truth.
+
+The following performance metrics are used:
+
+RMS WAVEFRONT RECONSTRUCTION ERROR
+
+Measures the overall difference between the true wavefront and the reconstructed wavefront.
+
+ZERNIKE COEFFICIENT RECOVERY ERROR
+
+Evaluates the accuracy of modal coefficient estimation.
+
+FRIED PARAMETER ESTIMATION ERROR
+
+Quantifies deviation between simulated and reconstructed r0 values.
+
+COHERENCE TIME ESTIMATION ERROR
+
+Quantifies deviation between simulated and reconstructed tau0 values.
+
+RESIDUAL CORRECTION ERROR
+
+Measures remaining wavefront error after deformable mirror correction.
+
+COMPUTATIONAL PERFORMANCE
+
+Measures total processing time, memory utilization, and scalability of the reconstruction framework.
+
+---
+
+EXPECTED OUTCOME
+
+The proposed simulation framework establishes a complete end-to-end Adaptive Optics development environment capable of 
+generating realistic SHWFS measurements, reconstructing wavefront phase maps, estimating atmospheric turbulence parameters, 
+and computing deformable mirror actuator commands.
+
+This approach enables rigorous development, validation, and optimization of the complete reconstruction pipeline in the 
+absence of experimental datasets while maintaining compatibility with future real-world SHWFS observations and hardware 
+systems.

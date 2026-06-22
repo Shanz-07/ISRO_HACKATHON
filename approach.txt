@@ -1,0 +1,86 @@
+
+                   reconstructing wavefront using SHWFS output image
+
+
+OUTCOMES:
+
+1. Reconstructed wavefront map (W(xi,yi))
+2. Turbulence characteristics:
+   -> i) r0 (coherence length) , ii) τ0 (coherence time)(t0 = 0.314 * r0/v0)
+3. Actuator map (in terms of actuator stroke lengths taking into account the inter-actuator
+   coupling)
+
+What :
+
+*When we try to observe a celestial body, the light reaching Earth can be approximated as a plane (flat) wavefront 
+because the source is very far away. However, when it passes through the atmosphere, variations in temperature and 
+density cause changes in refractive index.
+These atmospheric turbulences distort the wavefront and we obtain a blurred or distorted image of the celestial body.
+
+*The problem:
+Due to atmospheric turbulence, the telescope receives a distorted wavefront and therefore cannot form a perfectly sharp image.
+
+
+
+HOW:
+
+*Scientists solved this using a Microlens Array (MLA) placed in a Shack-Hartmann Wavefront Sensor (SHWFS). 
+The incoming distorted wavefront is incident on all the lenslets.
+Each lenslet focuses the light onto a detector and forms a spot. 
+The collection of all spot positions contains information about the local slopes of the incoming wavefront.
+
+*The solution:
+-> Initially we incident a plane wavefront of light onto the lenslets and the spot positions formed by each 
+individual lenslet are recorded. These are our reference positions corresponding to an undistorted wavefront.
+
+-> Now when we observe a celestial body, the distorted wavefront reaches the SHWFS and the focal spots shift 
+from their reference positions by Δx and Δy.
+
+-> We calculate the displacement (Δx, Δy) of every spot with respect to its reference position. 
+These displacements are directly proportional to the local wavefront slopes (∂W/∂x and ∂W/∂y).
+
+-> The spot centroids are calculated using centroiding algorithms and the centroid shifts are 
+converted into local wavefront slope measurements.
+
+-> These slope measurements from all lenslets are combined into a slope vector. 
+Using wavefront reconstruction algorithms (Zernike modal reconstruction or least-squares reconstruction), 
+the complete wavefront phase map W(x,y) is reconstructed.
+
+-> Once the wavefront is reconstructed for every frame, turbulence statistics can be extracted from the phase data. 
+The Fried parameter (r0) is estimated using Kolmogorov turbulence theory and phase structure functions
+, while the coherence time (τ0) is estimated from the temporal evolution of the reconstructed wavefront.
+
+-> To correct the distorted wavefront, a Deformable Mirror (DM) is used. 
+The reconstructed wavefront error is converted into an equal and opposite correction wavefront.
+
+-> Since each actuator on the deformable mirror influences not only its own region but also neighbouring regions 
+(inter-actuator coupling), an influence matrix is used to model the mirror behaviour.
+
+-> Using the reconstructed wavefront and the DM influence matrix, actuator stroke lengths are calculated. 
+These stroke lengths represent how much each actuator must move to generate the corrective wavefront.
+
+-> The final outputs are:
+1) Reconstructed Wavefront Map W(xi,yi)
+2) Turbulence Parameters (r0 and τ0)
+3) Deformable Mirror Actuator Stroke Map(W=IA)
+
+
+Why :
+
+While the physics of wavefront reconstruction are well understood, 
+implementing this in a real-time Adaptive Optics loop presents three severe engineering challenges:
+
+
+The Latency Constraint:
+Atmospheric turbulence evolves on a timescale characterized by τ0.The complete sensing,
+reconstruction and correction pipeline must operate faster than this coherence time. Otherwise the calculated correction
+corresponds to an outdated wavefront and becomes ineffective.
+
+
+The Computational Load: Translating hundreds of spot deviations into a full wavefront phase map requires massive matrix 
+multiplications. This demands highly optimized, low-level algorithms (like C) to ensure computational efficiency and prevent 
+memory bottlenecks.
+
+Mechanical Cross-Coupling: Deformable Mirror actuators are not physically independent; 
+pushing one motor pulls the glass of its immediate neighbors. Systems that fail to calculate an "influence matrix" 
+to decouple these forces will warp the mirror incorrectly and worsen the image.
